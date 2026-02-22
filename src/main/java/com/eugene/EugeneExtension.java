@@ -17,6 +17,8 @@ public final class EugeneExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onInitialize() {
+        TickDelayer.init();
+        CarpetServer.manageExtension(new EugeneExtension());
     }
 
     @Override
@@ -26,5 +28,6 @@ public final class EugeneExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher, final CommandRegistryAccess commandBuildContext){
+        PlayerLecternCommand.register(dispatcher, commandBuildContext);
     }
 }
