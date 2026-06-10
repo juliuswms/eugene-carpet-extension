@@ -14,6 +14,11 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.lang.reflect.Type;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,6 +31,27 @@ public final class LecternActions {
     private static final Map<UUID, LecternActions.LecternSession> sessions = new ConcurrentHashMap<>();
     private static final Map<UUID, LecternInstructions> instructionsSessions = new ConcurrentHashMap<>();
     private static final Map<UUID, LecternJob> jobSessions = new ConcurrentHashMap<>();
+    private static final Map<Character, Integer> GLYPH_TO_PAGE;
+    private static final Integer homePosition = 1;
+
+    static {
+        GLYPH_TO_PAGE = new HashMap<>();
+        // Load from classpath
+        Reader reader = new InputStreamReader(
+            LecternActions.class.getResourceAsStream(
+                "/assets/eugene-carpet-extension/char-mapping.json"
+            )
+        );
+        Type listType = new TypeToken<List<String>>() {}.getType();
+        List<String> glyphs = new Gson().fromJson(reader, listType);
+
+        for (int i = 0; i < glyphs.size(); i++) {
+            String glyph = glyphs.get(i);
+            if (glyph != null && !glyph.isEmpty()) {
+                GLYPH_TO_PAGE.put(glyph.charAt(0), i + 1); // index → 1-based page
+            }
+        }
+    }
 
     public static boolean startLecternJob(ServerPlayerEntity target, ServerCommandSource source){
         if(jobSessions.get(target.getUuid()) != null){
@@ -137,24 +163,13 @@ public final class LecternActions {
         for (int i = 1; i < pageCount; i++) {
             String page = getBookPageContent(book, i);
             for (int j = 0; j < page.length(); j++) {
-                switch (page.charAt(j)) {
-                    case '0' -> rawInstructions.add(1);
-                    case '1' -> rawInstructions.add(2);
-                    case '2' -> rawInstructions.add(3);
-                    case '3' -> rawInstructions.add(4);
-                    case '4' -> rawInstructions.add(5);
-                    case '5' -> rawInstructions.add(6);
-                    case '6' -> rawInstructions.add(7);
-                    case '7' -> rawInstructions.add(8);
-                    case '8' -> rawInstructions.add(9);
-                    case '9' -> rawInstructions.add(10);
-                    case 'A' -> rawInstructions.add(11);
-                    case 'B' -> rawInstructions.add(12);
-                    case 'C' -> rawInstructions.add(13);
-                    case 'D' -> rawInstructions.add(14);
-                    case 'E' -> rawInstructions.add(15);
-                    default -> { Messenger.m(source, "r Book contains illegal char."); return false; }
+                Integer pageNumber = GLYPH_TO_PAGE.get(page.charAt(j));
+                if (pageNumber == null){
+                    Messenger.m(source, "r Book contains illegal char.");
+                    return false;
                 }
+                rawInstructions.add(homePosition);
+                rawInstructions.add(pageNumber);
             }
         }
         instructions = new LecternInstructions(jobName, estimatedTotalTime, rawInstructions, delays, pauseDelay);
