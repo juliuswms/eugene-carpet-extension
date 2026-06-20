@@ -51,6 +51,7 @@ public class LecternJob {
             return;
         }
         if(!active){
+            LecternActions.turnToPage(target,2, source);
             Messenger.m(source, "w Stopped printing at: " + instructionIndex);
             return;
         }
