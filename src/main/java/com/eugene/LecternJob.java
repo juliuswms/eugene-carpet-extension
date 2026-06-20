@@ -22,6 +22,7 @@ public class LecternJob {
     int[] tickDelays;
     int tickDelayIndex;
     MinecraftServer server;
+    private static final Integer magChangeDelay = 4;
 
     public LecternJob(ServerPlayerEntity target, ServerCommandSource source, LecternBlockEntity lectern, LecternInstructions instructions) {
         this.target = target;
@@ -56,7 +57,8 @@ public class LecternJob {
             return;
         }
         if (instruction == 1){
-            stepTickDelay();
+            //stepTickDelay();
+            currentTickDelay = magChangeDelay;
         }else if(instruction != 2){
             currentTickDelay = homeTickDelay;
         }
