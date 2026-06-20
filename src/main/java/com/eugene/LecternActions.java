@@ -32,7 +32,8 @@ public final class LecternActions {
     private static final Map<UUID, LecternInstructions> instructionsSessions = new ConcurrentHashMap<>();
     private static final Map<UUID, LecternJob> jobSessions = new ConcurrentHashMap<>();
     private static final Map<Character, Integer> GLYPH_TO_PAGE;
-    private static final Integer homePosition = 1;
+    private static final Integer homePosition = 2;
+    private static final Integer magChangePosition = 1;
 
     static {
         GLYPH_TO_PAGE = new HashMap<>();
@@ -170,6 +171,9 @@ public final class LecternActions {
                 }
                 rawInstructions.add(homePosition);
                 rawInstructions.add(pageNumber);
+                if(pageNumber.equals(magChangePosition)){
+                    rawInstructions.add(homePosition);
+                }
             }
         }
         instructions = new LecternInstructions(jobName, estimatedTotalTime, rawInstructions, delays, pauseDelay);
